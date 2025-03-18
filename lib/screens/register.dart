@@ -20,7 +20,21 @@ class SignUpScreen extends StatefulWidget {
 
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  final _formSignupKey = GlobalKey<FormState>();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPassword = TextEditingController();
+  final _formSignupKey = GlobalKey<FormState>(); // For form validation
+
+  // Variables for form validation
+  bool obsecure = true; // For password
+  bool obsecureConfirm = true; // For confirm password
+  bool loading = false; // For loading
+
+  bool _isLoading = false;
+
+
+
   bool agreePersonalData = true;
   @override
   Widget build(BuildContext context) {
@@ -65,6 +79,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                       // full name
                       TextFormField(
+                        controller: _usernameController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter Full name';
@@ -96,6 +111,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                       // email
                       TextFormField(
+                        controller: _emailController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter Email';
@@ -127,11 +143,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                       // password
                       TextFormField(
-                        obscureText: true,
+                        controller: _passwordController,
+                        obscureText: obsecure, // Use the obsecure variable here
                         obscuringCharacter: '*',
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter Password';
+                            return 'Please enter a password.';
+                          }
+                          if (value.length < 6) {
+                            return 'Password must be at least 6 characters long.';
+                          }
+                          if (!value.contains(RegExp(r'[A-Z]'))) {
+                            return 'Password must contain at least one uppercase letter.';
+                          }
+                          if (value.replaceAll(RegExp(r'[^0-9]'), '').length < 1) {
+                            return 'Password must contain at least one digit.';
+                          }
+                          if (!value.contains(RegExp(r'[!@#\$%^&*()_+{}\[\]:;<>,.?~\\-]'))) {
+                            return 'Password must contain at least one special character.';
                           }
                           return null;
                         },
@@ -143,25 +172,37 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                           border: OutlineInputBorder(
                             borderSide: const BorderSide(
-                              color: Colors.black12, // Default border color
+                              color: Colors.black12,
                             ),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderSide: const BorderSide(
-                              color: Colors.black12, // Default border color
+                              color: Colors.black12,
                             ),
                             borderRadius: BorderRadius.circular(10),
                           ),
+                          suffixIcon: IconButton( // Add the suffixIcon here
+                            onPressed: () {
+                              setState(() {
+                                obsecure = !obsecure;
+                              });
+                            },
+                            icon: Icon(obsecure ? Icons.remove_red_eye_outlined : Icons.remove_red_eye),
+                          ),
                         ),
                       ),
-                      SizedBox(height: 20.0), // Add space here
+                      SizedBox(height: 20.0),
                       TextFormField(
-                        obscureText: true,
+                        controller: _confirmPassword,
+                        obscureText: obsecureConfirm, // Use the obsecureConfirm variable
                         obscuringCharacter: '*',
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter Password';
+                            return 'Please confirm your password.';
+                          }
+                          if (value != _passwordController.text.trim()) {
+                            return 'Passwords don\'t match. Please check your new password.';
                           }
                           return null;
                         },
@@ -173,22 +214,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                           border: OutlineInputBorder(
                             borderSide: const BorderSide(
-                              color: Colors.black12, // Default border color
+                              color: Colors.black12,
                             ),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderSide: const BorderSide(
-                              color: Colors.black12, // Default border color
+                              color: Colors.black12,
                             ),
                             borderRadius: BorderRadius.circular(10),
                           ),
+                          suffixIcon: IconButton( // Add the suffixIcon for toggling visibility
+                            onPressed: () {
+                              setState(() {
+                                obsecureConfirm = !obsecureConfirm;
+                              });
+                            },
+                            icon: Icon(obsecureConfirm ? Icons.remove_red_eye_outlined : Icons.remove_red_eye),
+                          ),
                         ),
                       ),
-
-                      const SizedBox(
-                        height: 25.0,
-                      ),
+                      SizedBox(height: 20.0),
                       // i agree to the processing
                       Row(
                         children: [
