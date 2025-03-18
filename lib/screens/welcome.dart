@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lastauth/screens/register.dart';
-
+import 'package:get/get.dart';
 import '../theme/theme.dart';
 import '../widgets/custom_scaffold.dart';
 import '../widgets/welcome_button.dart';

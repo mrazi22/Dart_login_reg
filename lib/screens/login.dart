@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:lastauth/screens/register.dart';
-
+import 'package:get/get.dart';
 import '../theme/theme.dart';
 import '../widgets/custom_scaffold.dart';
 
@@ -117,6 +117,7 @@ class _SignInScreenState extends State<SignInScreen> {
                           ),
                         ),
                       ),
+
                       const SizedBox(
                         height: 25.0,
                       ),
@@ -237,12 +238,7 @@ class _SignInScreenState extends State<SignInScreen> {
                           ),
                           GestureDetector(
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (e) => const SignUpScreen(),
-                                ),
-                              );
+                              Get.to(() => const SignUpScreen()); // GetX navigation
                             },
                             child: Text(
                               'Sign up',

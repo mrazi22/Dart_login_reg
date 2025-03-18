@@ -5,7 +5,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
-
+import 'package:get/get.dart';
 import '../theme/theme.dart';
 import '../widgets/custom_scaffold.dart';
 import 'login.dart';
@@ -155,6 +155,37 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ),
                       ),
+                      SizedBox(height: 20.0), // Add space here
+                      TextFormField(
+                        obscureText: true,
+                        obscuringCharacter: '*',
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter Password';
+                          }
+                          return null;
+                        },
+                        decoration: InputDecoration(
+                          label: const Text('Confirm Password'),
+                          hintText: 'Re-Enter Password',
+                          hintStyle: const TextStyle(
+                            color: Colors.black26,
+                          ),
+                          border: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                              color: Colors.black12, // Default border color
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                              color: Colors.black12, // Default border color
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+
                       const SizedBox(
                         height: 25.0,
                       ),
@@ -272,12 +303,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                           GestureDetector(
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (e) => const SignInScreen(),
-                                ),
-                              );
+                              Get.to(() => const SignInScreen()); // GetX navigation
                             },
                             child: Text(
                               'Sign in',
