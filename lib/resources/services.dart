@@ -30,4 +30,23 @@ class Services{
   }
 
 
+  // Register user
+static  Future<Object> registerUsers(String username, String email, String password, String token, String uid) async {
+  try{
+    var request = http.MultipartRequest('POST', Uri.parse(_USERS));
+    request.fields['action'] = _REGISTER;
+    request.fields['uid'] = uid;
+    request.fields['username'] = username;
+    request.fields['email'] = email;
+    request.fields['token'] = token;
+    request.fields['password'] = password;
+    var response = await request.send();
+    return response;
+  } catch(e){
+    return 'error';
+  }
+
+}
+
+
 }
