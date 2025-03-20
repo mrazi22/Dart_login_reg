@@ -34,7 +34,7 @@ class WelcomeScreen extends StatelessWidget {
                             )),
                         TextSpan(
                             text:
-                            '\nEnter personal details to your employee account',
+                            '\nwelcome to your construction record keeping solution',
                             style: TextStyle(
                               fontSize: 20,
                               // height: 0,

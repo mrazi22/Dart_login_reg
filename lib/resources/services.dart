@@ -1,52 +1,63 @@
+
+
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
-import '../models/users.dart';
+class Services {
+  static const String HOST = "http://192.168.137.1:3000/";
 
+  static const String register = HOST + "register";
+  static const String login = HOST + "login";
 
+  static Future<Map<String, dynamic>> registerUser({
+    required String uid,
+    required String username,
+    required String email,
+    required String password,
+  }) async {
+    final url = Uri.parse(register);
 
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'uid': uid,
+          'username': username,
+          'email': email,
+          'password': password,
+        }),
+      );
 
-
-
-
-
-class Services{
-  static String HOST = "http://localhost/PHPauth-serve/";
-
-
-
-  // Register user
-  static String _USERS = HOST + "users.php";
-  static  String _REGISTER  = 'REGISTER';
-  static  String _LOGIN  = 'LOGIN';
-
-
-  // Method to create the table Users.
-  List<UserModel> userFromJson(String jsonString) {
-    final data = json.decode(jsonString);
-    return List<UserModel>.from(data.map((item) => UserModel.fromJson(item)));
+      final data = jsonDecode(response.body);
+      return data;
+    } catch (e) {
+      return {'failed': false, 'message': 'Registration failed: $e'};
+    }
   }
 
+  // Login function
+  static Future<Map<String, dynamic>> loginUser({
+    required String email,
+    required String password,
+  }) async {
+    final url = Uri.parse(login);
 
-  // Register user
-static  Future<Object> registerUsers(String username, String email, String password, String token, String uid) async {
-  try{
-    var request = http.MultipartRequest('POST', Uri.parse(_USERS));
-    request.fields['action'] = _REGISTER;
-    request.fields['uid'] = uid;
-    request.fields['username'] = username;
-    request.fields['email'] = email;
-    request.fields['token'] = token;
-    request.fields['password'] = password;
-    var response = await request.send();
-    return response;
-  } catch(e){
-    return 'error';
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+      return data;
+    } catch (e) {
+      return {'status': 'error', 'message': 'Login failed: $e'};
+    }
   }
-
-}
-
-
 }

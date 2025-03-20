@@ -6,8 +6,11 @@
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:get/get.dart';
+import 'package:uuid/uuid.dart';
+import '../resources/services.dart';
 import '../theme/theme.dart';
 import '../widgets/custom_scaffold.dart';
+import 'home.dart';
 import 'login.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -20,10 +23,10 @@ class SignUpScreen extends StatefulWidget {
 
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPassword = TextEditingController();
+  late TextEditingController _usernameController = TextEditingController();
+  late TextEditingController _emailController = TextEditingController();
+  late TextEditingController _passwordController = TextEditingController();
+  late TextEditingController _confirmPassword = TextEditingController();
   final _formSignupKey = GlobalKey<FormState>(); // For form validation
 
   // Variables for form validation
@@ -32,6 +35,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool loading = false; // For loading
 
   bool _isLoading = false;
+
+  //initial state
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _usernameController = TextEditingController();
+    _emailController = TextEditingController();
+    _passwordController = TextEditingController();
+    _confirmPassword = TextEditingController();
+
+
+  }
+  //implement dispose
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+   _usernameController.dispose();
+   _emailController.dispose();
+   _passwordController.dispose();
+   _confirmPassword.dispose();
+  }
 
 
 
@@ -269,7 +294,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () {
+                          onPressed: () { // Correct placement of onPressed
                             if (_formSignupKey.currentState!.validate() &&
                                 agreePersonalData) {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -277,6 +302,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   content: Text('Processing Data'),
                                 ),
                               );
+                              _registerUser(); // Trigger registerUser here
                             } else if (!agreePersonalData) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
@@ -373,5 +399,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ],
       ),
     );
+  }
+  //register users
+  void _registerUser() async {
+    String uid = "";
+    Uuid uuid = const Uuid();
+    uid = uuid.v1();
+    final response = await Services.registerUser(
+      uid: uid,
+      username: _usernameController.text,
+      email: _emailController.text,
+      password: _passwordController.text,
+    );
+
+    if (response['status'] == "success") {
+      print("Registration successful: ${response['user']}"); // Print user data
+      Get.offAll(() => const SignInScreen(), transition: Transition.rightToLeft);
+      Get.snackbar("Success", response['message']);
+    } else {
+      print("Registration failed: ${response['message']}"); // Print error message
+      Get.snackbar("Error", response['message']);
+    }
   }
 }

@@ -6,8 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:lastauth/screens/register.dart';
 import 'package:get/get.dart';
+import '../resources/services.dart';
 import '../theme/theme.dart';
 import '../widgets/custom_scaffold.dart';
+import 'home.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -17,6 +19,30 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
+  //declare variables
+  late TextEditingController _email;
+  late TextEditingController _password;
+
+  //declear initial state
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _email = TextEditingController();
+    _password = TextEditingController();
+  }
+  //declear disposable
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+
+    _email.dispose();
+    _password.dispose();
+
+  }
+
+
+
   final _formSignInKey = GlobalKey<FormState>();
   bool rememberPassword = true;
   @override
@@ -59,6 +85,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         height: 40.0,
                       ),
                       TextFormField(
+                        controller: _email,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter Email';
@@ -89,6 +116,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         height: 25.0,
                       ),
                       TextFormField(
+                        controller: _password,
                         obscureText: true,
                         obscuringCharacter: '*',
                         validator: (value) {
@@ -168,6 +196,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                   content: Text('Processing Data'),
                                 ),
                               );
+                              _loginUser(); // Trigger LoginUser here
                             } else if (!rememberPassword) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
@@ -259,8 +288,24 @@ class _SignInScreenState extends State<SignInScreen> {
               ),
             ),
           ),
+
         ],
       ),
     );
+  }
+  void _loginUser() async {
+    final response = await Services.loginUser(
+      email: _email.text,
+      password: _password.text,
+    );
+
+    if (response['status'] == "success") {
+      print("Login successful: ${response['user']}"); // Print user data
+      Get.offAll(() => const HomeScreen(), transition: Transition.rightToLeft);
+      Get.snackbar("Success", response['message']);
+    } else {
+      print("Login failed: ${response['message']}"); // Print error message
+      Get.snackbar("Error", response['message']);
+    }
   }
 }
