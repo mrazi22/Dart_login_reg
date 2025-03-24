@@ -4,9 +4,12 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
+import '../main.dart';
+import '../models/users.dart';
 import '../resources/services.dart';
 import '../theme/theme.dart';
 import '../widgets/custom_scaffold.dart';
@@ -45,22 +48,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
     _confirmPassword = TextEditingController();
-
-
   }
+
   //implement dispose
   void dispose() {
     // TODO: implement dispose
     super.dispose();
-   _usernameController.dispose();
-   _emailController.dispose();
-   _passwordController.dispose();
-   _confirmPassword.dispose();
+    _usernameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPassword.dispose();
   }
 
 
-
   bool agreePersonalData = true;
+
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
@@ -169,7 +171,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       // password
                       TextFormField(
                         controller: _passwordController,
-                        obscureText: obsecure, // Use the obsecure variable here
+                        obscureText: obsecure,
+                        // Use the obsecure variable here
                         obscuringCharacter: '*',
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -181,10 +184,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           if (!value.contains(RegExp(r'[A-Z]'))) {
                             return 'Password must contain at least one uppercase letter.';
                           }
-                          if (value.replaceAll(RegExp(r'[^0-9]'), '').length < 1) {
+                          if (value
+                              .replaceAll(RegExp(r'[^0-9]'), '')
+                              .length < 1) {
                             return 'Password must contain at least one digit.';
                           }
-                          if (!value.contains(RegExp(r'[!@#\$%^&*()_+{}\[\]:;<>,.?~\\-]'))) {
+                          if (!value.contains(
+                              RegExp(r'[!@#\$%^&*()_+{}\[\]:;<>,.?~\\-]'))) {
                             return 'Password must contain at least one special character.';
                           }
                           return null;
@@ -213,14 +219,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 obsecure = !obsecure;
                               });
                             },
-                            icon: Icon(obsecure ? Icons.remove_red_eye_outlined : Icons.remove_red_eye),
+                            icon: Icon(
+                                obsecure ? Icons.remove_red_eye_outlined : Icons
+                                    .remove_red_eye),
                           ),
                         ),
                       ),
                       SizedBox(height: 20.0),
                       TextFormField(
                         controller: _confirmPassword,
-                        obscureText: obsecureConfirm, // Use the obsecureConfirm variable
+                        obscureText: obsecureConfirm,
+                        // Use the obsecureConfirm variable
                         obscuringCharacter: '*',
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -255,7 +264,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 obsecureConfirm = !obsecureConfirm;
                               });
                             },
-                            icon: Icon(obsecureConfirm ? Icons.remove_red_eye_outlined : Icons.remove_red_eye),
+                            icon: Icon(obsecureConfirm
+                                ? Icons.remove_red_eye_outlined
+                                : Icons.remove_red_eye),
                           ),
                         ),
                       ),
@@ -375,7 +386,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                           GestureDetector(
                             onTap: () {
-                              Get.to(() => const SignInScreen()); // GetX navigation
+                              Get
+                                  .to(() => const SignInScreen()); // GetX navigation
                             },
                             child: Text(
                               'Sign in',
@@ -400,6 +412,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ),
     );
   }
+
   //register users
   void _registerUser() async {
     String uid = "";
@@ -413,12 +426,37 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
 
     if (response['status'] == "success") {
-      print("Registration successful: ${response['user']}"); // Print user data
-      Get.offAll(() => const SignInScreen(), transition: Transition.rightToLeft);
-      Get.snackbar("Success", response['message']);
+      print("Registration successful: ${response['user']}");
+
+      try {
+        // Create a local UserModel variable
+        UserModel user = UserModel.fromJson(response["user"]);
+
+        // Open the user box
+        final userBox = await Hive.openBox<UserModel>('userBox');
+
+        // Store the user in Hive
+        await userBox.put('currentUser', user);
+
+        // Initialize currentUser using the stored user
+        globalUserModel = user;
+
+        Get.offAll(() => const HomeScreen(),
+            transition: Transition.rightToLeft);
+        Get.snackbar("Success", response['message']);
+      } catch (e) {
+        print("Error processing user data: $e");
+        Get.snackbar("Error", "Failed to store user data.");
+      }
     } else {
-      print("Registration failed: ${response['message']}"); // Print error message
+      print("Registration failed: ${response['message']}");
       Get.snackbar("Error", response['message']);
     }
   }
+//create a local user model variable
+//convert json  response["user"] from the serve to usermodel for hive to store
+// user = UserModel.fromJson(json.decode(response["user"]));
+//store user to hive
+//initialize currentUser using user
+
 }

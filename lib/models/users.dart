@@ -1,10 +1,22 @@
+import 'package:hive/hive.dart';
+
+part 'users.g.dart';
+
+@HiveType(typeId: 0)
 class UserModel {
+  @HiveField(0)
   late String uid;
+  @HiveField(1)
   String? username;
+  @HiveField(2)
   String? email;
+  @HiveField(3)
   String? password;
+  @HiveField(4)
   String? token;
 
+
+  // UserModel constructor
   UserModel({
     required this.uid,
      this.username,
@@ -21,7 +33,7 @@ class UserModel {
       password: json['password'] as String,
     );
   }
-  // Convert an UserModel object into a JSON object
+  // Convert an UserModel object into a JSON object for posting data to the server
   Map<String, dynamic> toJsonAdd() {
     return {
       'uid': uid,
@@ -44,3 +56,11 @@ class UserModel {
 
 
 }
+//specify hive id for user model 0
+//specify hive field for every attribute
+// part to create an adapter for the user model
+//part "user.g.dart"
+
+
+//build user model adapter flutter pub run build_runner build
+//

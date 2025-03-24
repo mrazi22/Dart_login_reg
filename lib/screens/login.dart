@@ -3,9 +3,12 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:lastauth/screens/register.dart';
 import 'package:get/get.dart';
+import '../main.dart';
+import '../models/users.dart';
 import '../resources/services.dart';
 import '../theme/theme.dart';
 import '../widgets/custom_scaffold.dart';
@@ -300,11 +303,29 @@ class _SignInScreenState extends State<SignInScreen> {
     );
 
     if (response['status'] == "success") {
-      print("Login successful: ${response['user']}"); // Print user data
-      Get.offAll(() => const HomeScreen(), transition: Transition.rightToLeft);
-      Get.snackbar("Success", response['message']);
+      print("Login successful: ${response['user']}");
+
+      try {
+        // Create a local UserModel variable
+        UserModel user = UserModel.fromJson(response["user"]);
+
+        // Open the user box
+        final userBox = await Hive.openBox<UserModel>('userBox');
+
+        // Store the user in Hive
+        await userBox.put('currentUser', user);
+
+        // Initialize currentUser using the stored user
+        globalUserModel = user;
+
+        Get.offAll(() => const HomeScreen(), transition: Transition.rightToLeft);
+        Get.snackbar("Success", response['message']);
+      } catch (e) {
+        print("Error processing user data: $e");
+        Get.snackbar("Error", "Failed to store user data.");
+      }
     } else {
-      print("Login failed: ${response['message']}"); // Print error message
+      print("Login failed: ${response['message']}");
       Get.snackbar("Error", response['message']);
     }
   }
