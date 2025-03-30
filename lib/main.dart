@@ -6,12 +6,15 @@ import 'package:lastauth/screens/home.dart';
 import 'package:lastauth/screens/welcome.dart';
 import 'package:lastauth/theme/theme.dart';
 
-import 'models/users.dart'; // Import GetX
+import 'models/users/users.dart'; // Import GetX
+import 'models/project/ProjectModel.dart';
 
 
 
 // Global variable to store the user model
-UserModel? globalUserModel;
+UserModel? currentUser;
+// Global variable to store the list of projects
+List<ProjectModel> currentProjects = [];
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,13 +23,28 @@ void main() async {
   await Hive.initFlutter();
 
   // Register UserModel adapter with Hive
-  Hive.registerAdapter(UserModelAdapter()); // Replace UserModelAdapter with your actual adapter
+  Hive.registerAdapter(UserModelAdapter());
+
+  // Register ProjectModel adapter with Hive
+  Hive.registerAdapter(ProjectModelAdapter());
 
   // Open the user box
   final userBox = await Hive.openBox<UserModel>('userBox');
 
+  // Open the project box
+  final projectBox = await Hive.openBox<ProjectModel>('projectsBox'); // Changed to projectsBox
+
   // Get user data from the box and store it in the global variable
-  globalUserModel = userBox.get('currentUser');
+  currentUser = userBox.get('currentUser');
+
+  // Get project data from the box and store it in the global variable
+  currentProjects = projectBox.values.toList(); // Retrieve all projects
+
+  if (currentProjects.isNotEmpty) {
+    print("[✅HIVE]Active Project sessions found. Restored ${currentProjects.length} projects.");
+  } else {
+    print("[❌HIVE]No active Project sessions found.");
+  }
 
   runApp(const MyApp());
 }
@@ -36,22 +54,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (globalUserModel == null) {
-      print("[❌HIVE]No active user session found. Navigating to WelcomeScreen.");
-      return GetMaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Flutter Demo',
-        theme: lightMode,
-        home: const WelcomeScreen(),
-      );
-    } else {
-      print("[✅HIVE]Active user session found for user: ${globalUserModel?.username ?? 'Unknown'}. Navigating to HomeScreen.");
-      return GetMaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Flutter Demo',
-        theme: lightMode,
-        home: const HomeScreen(), // Replace HomeScreen
-      );
-    }
+    print(currentUser == null
+            ? "[❌HIVE]No active user session found. Navigating to WelcomeScreen."
+        : "[✅HIVE]Active user session found for user: ${currentUser?.username ?? 'Unknown'}. Navigating to HomeScreen."
+    );
+    return GetMaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Flutter Demo',
+      theme: lightMode,
+      home: currentUser == null? WelcomeScreen() : HomeScreen(),
+    );
   }
 }

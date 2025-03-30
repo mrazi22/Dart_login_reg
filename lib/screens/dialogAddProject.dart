@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:uuid/uuid.dart';
 
 import '../main.dart';
-import '../models/ProjectModel.dart';
+import '../models/project/ProjectModel.dart';
 import '../widgets/colors.dart';
 import '../widgets/textFieldInput.dart';
 
@@ -55,12 +57,15 @@ class _DialogAddProjectState extends State<DialogAddProject> {
                   return null;
                 },
                 enabled: true,
+                style: const TextStyle(color: Colors.black87),
               ),
               const SizedBox(height: 10),
               TextFieldInput(
                 textEditingController: TextEditingController(
-                    text: globalUserModel?.username ?? 'Unknown'),
+                    text: currentUser?.username ?? 'Unknown'),
                 textInputType: TextInputType.text,
+                style: const TextStyle(color: Colors.grey),
+
                 labelText: 'Created By',
                 enabled: false,
                 labelStyle: const TextStyle(color: Colors.grey),
@@ -147,12 +152,18 @@ class _DialogAddProjectState extends State<DialogAddProject> {
                   ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        widget.addProject(
-                          _projectTitle.text,
-                          _dateTime,
-                          _imageFile,
+                        Uuid uuid = Uuid();
+                        String projectid = uuid.v1();
+                        ProjectModel project = ProjectModel(
+                            projectid: projectid,
+                            publisherid: currentUser?.uid,
+                            accessid: currentUser?.uid,
+                            admin: currentUser?.uid,
+                            projecttitle: _projectTitle.text,
+                            date: _dateTime.toString(),
+                            image: _imageFile == null? "" : _imageFile!.path
                         );
-                        Navigator.of(context).pop();
+                        _addProject(project);
                       }
 
 
@@ -192,12 +203,19 @@ class _DialogAddProjectState extends State<DialogAddProject> {
     );
   }
 
+  void _addProject(ProjectModel project){
+    widget.addProject(project).then((value){
+      Navigator.pop(context);
+      Get.snackbar('Success', 'Project Created Successfully');
+    });
+  }
+  
   void _showDatePicker() {
     showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2100),
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
     ).then((value) {
       if (value != null) {
         setState(() {

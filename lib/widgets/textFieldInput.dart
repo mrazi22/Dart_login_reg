@@ -26,7 +26,7 @@ class TextFieldInput extends StatelessWidget {
     this.maxLength,
     this.textAlign = TextAlign.start,
     this.textInputType = TextInputType.text,
-    this.labelText, this.srfIcon, this.labelStyle, this.validator, required bool enabled,
+    this.labelText, this.srfIcon, this.labelStyle, this.validator, required bool enabled, required TextStyle style,
   }) : super(key: key);
 
   @override

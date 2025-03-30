@@ -8,7 +8,7 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:lastauth/screens/register.dart';
 import 'package:get/get.dart';
 import '../main.dart';
-import '../models/users.dart';
+import '../models/users/users.dart';
 import '../resources/services.dart';
 import '../theme/theme.dart';
 import '../widgets/custom_scaffold.dart';
@@ -316,7 +316,7 @@ class _SignInScreenState extends State<SignInScreen> {
         await userBox.put('currentUser', user);
 
         // Initialize currentUser using the stored user
-        globalUserModel = user;
+        currentUser = user;
 
         Get.offAll(() => const HomeScreen(), transition: Transition.rightToLeft);
         Get.snackbar("Success", response['message']);
